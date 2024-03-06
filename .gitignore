@@ -1,0 +1,10 @@
+# .gitignore
+
+# Python virtual environment
+.venv/
+
+# Environment variables file
+.env
+
+# Python cache
+__pycache__
