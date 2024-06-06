@@ -1,4 +1,6 @@
 import os, shelve, time
+import openai
+print(openai.__version__)
 from openai import OpenAI
 from flask import request
 from flask_restful import Resource
@@ -6,8 +8,8 @@ from dotenv import load_dotenv
 
 
 load_dotenv()
-KEY = os.getenv("OPEN_AI_API_KEY")
-client = OpenAI(api_key=KEY)
+KEY = os.getenv("OPENAI_API_KEY")
+client = OpenAI(api_key=KEY, default_headers={"OpenAI-Beta": "assistants=v2"})
 
 
 # --------------------------------------------------------------
@@ -27,21 +29,40 @@ def store_thread(nastavnik_id, thread_id):
 # Run assistant
 # --------------------------------------------------------------
 def run_assistant(thread, message_body):
+    
     # Retrieve the Assistant
     assistant = client.beta.assistants.retrieve(os.getenv("OPENAI_ASSISTANT_ID"))
+    print("ASS_ID--" + thread.id + "--" + assistant.id)
 
     # Run the assistant
     run = client.beta.threads.runs.create(
         thread_id=thread.id,
         assistant_id=assistant.id,
+        extra_headers={"OpenAI-Beta": "assistants=v2"}
     )
-
+    
     # Wait for completion
     while run.status != "completed":
         # Be nice to the API
+        
+
+        if (run.status == "failed"):
+            for property, value in vars(run).items():
+                print(property, ":", value)
+            
+            return {
+                "success": False,
+                "error": {
+                    "statusCode": 500,
+                    "message": "Run status failed!",
+                    "errorMessage": run,
+                },
+            }
+        
+        #print("lalla" + run.status)
         time.sleep(0.5)
         run = client.beta.threads.runs.retrieve(thread_id=thread.id, run_id=run.id)
-
+    #return
     # Retrieve the Messages
     messages = client.beta.threads.messages.list(thread_id=thread.id)
     new_message = messages.data[0].content[0].text.value
@@ -89,7 +110,7 @@ class AssistantApi(Resource):
                 role="user",
                 content=message_body,
             )
-
+            print(thread)
             # Run the assistant and get the new message
             new_message = run_assistant(thread, message_body)
             return new_message
