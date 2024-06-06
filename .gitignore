@@ -6,5 +6,8 @@
 # Environment variables file
 .env
 
+db/threads_db.dat
+responses.csv
+
 # Python cache
 __pycache__
