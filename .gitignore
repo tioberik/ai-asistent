@@ -5,6 +5,7 @@
 
 # Environment variables file
 .env
+configmap.yaml
 
 db/threads_db.dat
 responses.csv

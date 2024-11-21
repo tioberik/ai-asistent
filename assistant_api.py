@@ -4,12 +4,18 @@ print(openai.__version__)
 from openai import OpenAI
 from flask import request
 from flask_restful import Resource
+
+'''
 from dotenv import load_dotenv
-
-
 load_dotenv()
 KEY = os.getenv("OPENAI_API_KEY")
-client = OpenAI(api_key=KEY, default_headers={"OpenAI-Beta": "assistants=v2"})
+'''
+
+# Povucite varijable iz okruženja
+API_KEY = os.getenv('OPENAI_API_KEY')
+ASSISTANT_ID = os.getenv('OPENAI_ASSISTANT_ID')
+
+client = OpenAI(api_key=API_KEY, default_headers={"OpenAI-Beta": "assistants=v2"})
 
 
 # --------------------------------------------------------------
@@ -31,7 +37,7 @@ def store_thread(nastavnik_id, thread_id):
 def run_assistant(thread, message_body):
     
     # Retrieve the Assistant
-    assistant = client.beta.assistants.retrieve(os.getenv("OPENAI_ASSISTANT_ID"))
+    assistant = client.beta.assistants.retrieve(ASSISTANT_ID)
     print("ASS_ID--" + thread.id + "--" + assistant.id)
 
     # Run the assistant
